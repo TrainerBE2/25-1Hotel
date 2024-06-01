@@ -39,8 +39,9 @@ module.exports = {
       },
       status: {
         type: Sequelize.ENUM,
-        values: ['Confirmed', 'Waiting', 'Failed'],
-        allowNull: true
+        values: ['Confirmed', 'Waiting', 'Cancelled', 'Failed'],
+        allowNull: true,
+        defaultValue: 'waiting'
       },
       total_payment: {
         type: Sequelize.INTEGER,

@@ -1,7 +1,5 @@
-'use strict';
-const {
-  Model
-} = require('sequelize');
+"use strict";
+const { Model } = require("sequelize");
 module.exports = (sequelize, DataTypes) => {
   class tbl_payment extends Model {
     /**
@@ -11,38 +9,44 @@ module.exports = (sequelize, DataTypes) => {
      */
     static associate(models) {
       // define association here
-      this.belongsTo(models.tbl_transactions, { foreignKey: 'payment_id' });
-      this.belongsTo(models.tbl_users, { foreignKey: 'user_id' });
+      this.belongsTo(models.tbl_transactions, { foreignKey: "payment_id" });
+      this.belongsTo(models.tbl_users, { foreignKey: "user_id" });
     }
   }
-  tbl_payment.init({
-    payment_id: {
-      type: DataTypes.STRING,
-      allowNull: false,
-      primaryKey: true
-    },
-    user_id: {
-      type: DataTypes.STRING,
-      allowNull: false,
-      references: {
-        model: 'tbl_users',
-        key: 'user_id'
+  tbl_payment.init(
+    {
+      payment_id: {
+        type: DataTypes.STRING,
+        allowNull: false,
+        primaryKey: true,
       },
-      onUpdate: 'CASCADE',
-      onDelete: 'CASCADE'
+      user_id: {
+        type: DataTypes.STRING,
+        allowNull: false,
+        references: {
+          model: "tbl_users",
+          key: "user_id",
+        },
+        onUpdate: "CASCADE",
+        onDelete: "CASCADE",
+      },
+      methode: {
+        type: DataTypes.STRING,
+        allowNull: true,
+      },
+      amount: DataTypes.INTEGER,
+      status: {
+        type: DataTypes.ENUM,
+        allowNull: false,
+        values: ["Paid", "Pending", "Failed"],
+        defaultValue: "Pending",
+      },
     },
-    methode: DataTypes.STRING,
-    amount: DataTypes.INTEGER,
-    status: {
-      type: DataTypes.ENUM,
-      allowNull: false,
-      values: ['Paid', 'Pending', 'Failed'],
-      defaultValue: 'Pending'
+    {
+      sequelize,
+      modelName: "tbl_payments",
+      timestamps: true,
     }
-  }, {
-    sequelize,
-    modelName: 'tbl_payments',
-    timestamps: true
-  });
+  );
   return tbl_payment;
 };

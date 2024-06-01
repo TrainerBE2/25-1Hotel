@@ -1,39 +1,44 @@
 "use strict";
-
-const { sequelize } = require("../models");
-
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
   async up(queryInterface, Sequelize) {
-    await queryInterface.createTable("tbl_payments", {
-      payment_id: {
+    await queryInterface.createTable("tbl_reviews", {
+      review_id: {
         allowNull: false,
         autoIncrement: false,
         primaryKey: true,
         type: Sequelize.STRING,
       },
       user_id: {
-        allowNull: false,
         type: Sequelize.STRING,
+        allowNull: false,
         references: {
           model: "tbl_users",
           key: "user_id",
         },
-        onDelete: "CASCADE",
         onUpdate: "CASCADE",
+        onDelete: "CASCADE",
       },
-      methode: {
+      reservation_id: {
         type: Sequelize.STRING,
         allowNull: false,
+        references: {
+          model: "tbl_reservations",
+          key: "reservation_id",
+        },
+        onUpdate: "CASCADE",
+        onDelete: "CASCADE",
       },
-      amount: {
-        type: Sequelize.INTEGER,
+      rate: {
+        type: Sequelize.FLOAT,
         allowNull: true,
       },
-      status: {
-        type: Sequelize.ENUM,
-        values: ["Paid", "Pending", "Failed"],
-        defaultValue: "Pending",
+      verbal: {
+        type: Sequelize.STRING,
+      },
+      archived: {
+        type: Sequelize.TINYINT,
+        defaultValue: 0,
       },
       createdAt: {
         allowNull: false,
@@ -46,6 +51,6 @@ module.exports = {
     });
   },
   async down(queryInterface, Sequelize) {
-    await queryInterface.dropTable("tbl_payments");
+    await queryInterface.dropTable("tbl_reviews");
   },
 };

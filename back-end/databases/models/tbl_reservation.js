@@ -14,7 +14,7 @@ module.exports = (sequelize, DataTypes) => {
       this.belongsTo(models.tbl_users, {foreignKey: 'user_id'})
       this.hasMany(models.tbl_reviews, {foreignKey: 'review_id'})
       this.belongsTo(models.tbl_transactions, {foreignKey: 'reservation_id'})
-      this.belongsTo(models.tbl_rooms, {foreignKey: 'tbl_rooms'})
+      this.belongsTo(models.tbl_rooms, {foreignKey: 'room_id' ,as: 'room'})
     }
   }
   tbl_reservation.init({
@@ -42,6 +42,28 @@ module.exports = (sequelize, DataTypes) => {
       },
       onUpdate: 'CASCADE',
       onDelete: 'CASCADE'
+    },
+    date_in: {
+      type: DataTypes.DATE,
+      allowNull: false
+    },
+    date_out: {
+      type: DataTypes.DATE,
+      allowNull: false
+    },
+    status: {
+      type: DataTypes.ENUM,
+      values: ['Confirmed', 'Waiting', 'Cancelled', 'Failed'],
+      defaultValue: "Waiting"
+    },
+    archived: {
+      type: DataTypes.TINYINT,
+      allowNull: false,
+      defaultValue: 0
+    },
+    total_payment: {
+      type: DataTypes.INTEGER,
+      allowNull: false
     }
   }, {
     sequelize,

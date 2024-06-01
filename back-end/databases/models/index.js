@@ -11,9 +11,17 @@ const db = {};
 
 let sequelize;
 if (config.use_env_variable) {
-  sequelize = new Sequelize(process.env[config.use_env_variable], config);
+  // sequelize = new Sequelize(process.env[config.use_env_variable], config);
+  sequelize = new Sequelize(process.env[config.use_env_variable], {
+    ...config,
+    timezone: '+07:00', // Atur sesuai dengan zona waktu Jakarta
+  });
 } else {
-  sequelize = new Sequelize(config.database, config.username, config.password, config);
+  // sequelize = new Sequelize(config.database, config.username, config.password, config);
+  sequelize = new Sequelize(config.database, config.username, config.password, {
+    ...config,
+    timezone: '+07:00', // Atur sesuai dengan zona waktu Jakarta
+  });
 }
 
 fs
