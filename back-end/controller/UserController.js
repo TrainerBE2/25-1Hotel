@@ -1,11 +1,6 @@
 const bcrypt = require("bcrypt");
 const { parse } = require("dotenv");
-const {
-  tbl_transactions,
-  tbl_users,
-  tbl_payments,
-  tbl_reservations,
-} = require("../databases/models");
+const { tbl_users } = require("../databases/models");
 const Op = require("sequelize");
 
 const createUser = async (req, res, next) => {
@@ -111,13 +106,10 @@ const restoreUsers = async (req, res, next) => {
 
 const updateUser = async (req, res, next) => {
   try {
-    const userId = req.params.id; // Mendapatkan ID pengguna dari parameter rute
-    const { f_name, l_name, email, phone, password, status, token } = req.body; // Mendapatkan data yang akan diperbarui dari body permintaan
-
-    // Menemukan pengguna berdasarkan ID
+    const userId = req.params.id;
+    const { f_name, l_name, email, phone, password, status, token } = req.body;
     const user = await tbl_users.findByPk(userId);
 
-    // Jika pengguna tidak ditemukan, kirim respons 404
     if (!user) {
       return res.status(404).json({ message: "User not found" });
     }

@@ -23,7 +23,7 @@ const getAllReview = async (req, res) => {
         {
           model: tbl_users,
           as: "user",
-          attributes: ["first_name"],
+          attributes: ["first_name", "last_name"],
         },
         {
           model: tbl_reservations,
@@ -53,7 +53,9 @@ const createReview = async (req, res) => {
     const review = await tbl_reviews.create({
       review_id: reviewId,
       user_id: user_id,
+      reservation_id: reservation_id,
       rate: rate,
+      verbal: comment,
     });
     res.status(201).json(review);
   } catch (error) {
@@ -61,4 +63,24 @@ const createReview = async (req, res) => {
   }
 };
 
-module.exports = { createReview, getAllReview };
+const archiveReview = async (req, res) => {
+  try {
+    const { id } = req.query;
+    const decodeId = decodeURIComponent(id);
+    const review = await tbl_reviews.update(
+      { archived: 1 },
+      { where: { review_id: decodeId } }
+    );
+    if (review[0] === 1) {
+      res.status(200).json({
+        message: "Review has been deleted",
+      });
+    } else {
+      console.log("code id" + decodeId);
+      res.status(404).json({ message: "Review Doesn't Exist" });
+    }
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+module.exports = { createReview, getAllReview, archiveReview };
