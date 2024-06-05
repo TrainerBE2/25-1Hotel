@@ -4,6 +4,44 @@ const { tbl_rooms } = require("../models"); // Sesuaikan dengan struktur direkto
 
 module.exports = {
   up: async (queryInterface, Sequelize) => {
+    // Create the tbl_rooms table
+    await queryInterface.createTable("tbl_rooms", {
+      room_id: {
+        type: Sequelize.STRING,
+        allowNull: false,
+        primaryKey: true,
+      },
+      cat_id: {
+        type: Sequelize.INTEGER,
+        allowNull: false,
+      },
+      name: {
+        type: Sequelize.STRING,
+        allowNull: false,
+      },
+      description: {
+        type: Sequelize.TEXT,
+        allowNull: true,
+      },
+      price: {
+        type: Sequelize.INTEGER,
+        allowNull: false,
+      },
+      status: {
+        type: Sequelize.STRING,
+        allowNull: false,
+      },
+      createdAt: {
+        type: Sequelize.DATE,
+        allowNull: false,
+      },
+      updatedAt: {
+        type: Sequelize.DATE,
+        allowNull: false,
+      },
+    });
+
+    // Data for bulkInsert
     const roomsData = [];
 
     // Data untuk diacak
@@ -14,7 +52,7 @@ module.exports = {
 
     // Loop untuk membuat data kamar
     for (let i = 1; i <= 10; i++) {
-      const roomId = `A-${i}`; // ID kamar dari A-1 hingga A-3
+      const roomId = `A-${i}`; // ID kamar dari A-1 hingga A-10
       const categoryId = randomizeCategory(); // ID kategori yang diacak
       const roomName = `A-${i}`; // Nama kamar
       const roomDescription = `Description for Room ${i}`; // Deskripsi kamar
@@ -37,5 +75,8 @@ module.exports = {
     return queryInterface.bulkInsert("tbl_rooms", roomsData, {});
   },
 
-  down: async (queryInterface, Sequelize) => {},
+  down: async (queryInterface, Sequelize) => {
+    // Drop the tbl_rooms table
+    return queryInterface.dropTable("tbl_rooms");
+  },
 };
