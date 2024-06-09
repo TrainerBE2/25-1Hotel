@@ -36,9 +36,21 @@ module.exports = (sequelize, DataTypes) => {
       reservation_id: {
         type: DataTypes.STRING,
         allowNull: false,
+        references: {
+          model: "tbl_reservations",
+          key: "reservations_id",
+        },
+        onUpdate: "CASCADE",
+        onDelete: "CASCADE",
       },
-      rate: DataTypes.FLOAT,
-      verbal: DataTypes.TEXT,
+      rate: {
+        type: DataTypes.FLOAT,
+        allowNull: false,
+      },
+      verbal: {
+        type: DataTypes.TEXT,
+        allowNull: true,
+      },
       archived: {
         type: DataTypes.TINYINT,
         allowNull: false,

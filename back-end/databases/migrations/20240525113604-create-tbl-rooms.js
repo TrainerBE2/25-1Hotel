@@ -1,23 +1,27 @@
 "use strict";
-
-const { tbl_rooms } = require("../models"); // Sesuaikan dengan struktur direktori dan nama model Anda
-
+/** @type {import('sequelize-cli').Migration} */
 module.exports = {
-  up: async (queryInterface, Sequelize) => {
-    // Create the tbl_rooms table
+  async up(queryInterface, Sequelize) {
     await queryInterface.createTable("tbl_rooms", {
       room_id: {
-        type: Sequelize.STRING,
         allowNull: false,
+        autoIncrement: false,
         primaryKey: true,
+        type: Sequelize.STRING,
       },
       cat_id: {
-        type: Sequelize.INTEGER,
         allowNull: false,
+        autoIncrement: true,
+        type: Sequelize.INTEGER,
+        references: {
+          model: "tbl_rooms_categories",
+          key: "cat_id",
+        },
+        onUpdate: "CASCADE",
+        onDelete: "CASCADE",
       },
       name: {
         type: Sequelize.STRING,
-        allowNull: false,
       },
       description: {
         type: Sequelize.TEXT,
@@ -28,55 +32,23 @@ module.exports = {
         allowNull: false,
       },
       status: {
-        type: Sequelize.STRING,
-        allowNull: false,
+        type: Sequelize.ENUM,
+        values: ["Booked", "Occupied", "Available"],
+      },
+      archived: {
+        type: Sequelize.TINYINT,
+        defaultValue: 0,
       },
       createdAt: {
-        type: Sequelize.DATE,
         allowNull: false,
+        type: Sequelize.DATE,
       },
       updatedAt: {
-        type: Sequelize.DATE,
         allowNull: false,
+        type: Sequelize.DATE,
       },
     });
-
-    // Data for bulkInsert
-    const roomsData = [];
-
-    // Data untuk diacak
-    const categories = [1, 2, 3];
-    const randomizeCategory = () => {
-      return categories[Math.floor(Math.random() * categories.length)];
-    };
-
-    // Loop untuk membuat data kamar
-    for (let i = 1; i <= 10; i++) {
-      const roomId = `A-${i}`; // ID kamar dari A-1 hingga A-10
-      const categoryId = randomizeCategory(); // ID kategori yang diacak
-      const roomName = `A-${i}`; // Nama kamar
-      const roomDescription = `Description for Room ${i}`; // Deskripsi kamar
-      const roomPrice = Math.floor(Math.random() * 500000) + 50000; // Harga kamar acak antara 50.000 dan 550.000
-      const roomStatus = "Available"; // Status kamar
-
-      roomsData.push({
-        room_id: roomId,
-        cat_id: categoryId,
-        name: roomName,
-        description: roomDescription,
-        price: roomPrice,
-        status: roomStatus,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      });
-    }
-
-    // Masukkan data ke dalam tabel menggunakan bulkInsert
-    return queryInterface.bulkInsert("tbl_rooms", roomsData, {});
   },
 
-  down: async (queryInterface, Sequelize) => {
-    // Drop the tbl_rooms table
-    return queryInterface.dropTable("tbl_rooms");
-  },
+  down: async (queryInterface, Sequelize) => {},
 };

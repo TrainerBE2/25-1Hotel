@@ -1,11 +1,6 @@
 const bcrypt = require("bcrypt");
 const { parse } = require("dotenv");
-const {
-  tbl_transactions,
-  tbl_users,
-  tbl_payments,
-  tbl_reservations,
-} = require("../databases/models");
+const { tbl_users } = require("../databases/models");
 const Op = require("sequelize");
 
 const createUser = async (req, res, next) => {
@@ -55,24 +50,40 @@ const createUser = async (req, res, next) => {
 
 const getAllUsers = async (req, res, next) => {
   try {
-    const page = parseInt(req.query.page) || 1;
-    const limit = parseInt(req.query.limit) || 10;
+    const page = parseInt(req.query.page, 10) || 1;
+    const limit = parseInt(req.query.limit, 10) || 10;
     const totalCount = await tbl_users.count();
     const offset = (page - 1) * limit;
+
     const users = await tbl_users.findAll({
       offset,
       limit,
+      order: [["createdAt", "ASC"]],
     });
+
     const response = {
       total_page: Math.ceil(totalCount / limit),
       current_page: page,
       total_users: totalCount,
+      count: users.length,
       users,
     };
-    res.status(200).json(response);
+
+    return res.status(200).json(response);
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    return res.status(500).json({ message: error.message });
   }
+};
+
+const getUserById = async (req, res, next) => {
+  try {
+    const id = req.params.id;
+    const user = await tbl_users.findByPk(id);
+    if (!user) {
+      return res(404).json({ message: "User Not Found" });
+    }
+    res.status(200).json(user);
+  } catch (error) {}
 };
 
 const deleteUsers = async (req, res, next) => {
@@ -111,18 +122,14 @@ const restoreUsers = async (req, res, next) => {
 
 const updateUser = async (req, res, next) => {
   try {
-    const userId = req.params.id; // Mendapatkan ID pengguna dari parameter rute
-    const { f_name, l_name, email, phone, password, status, token } = req.body; // Mendapatkan data yang akan diperbarui dari body permintaan
-
-    // Menemukan pengguna berdasarkan ID
+    const userId = req.params.id;
+    const { f_name, l_name, email, phone, password, status, token } = req.body;
     const user = await tbl_users.findByPk(userId);
 
-    // Jika pengguna tidak ditemukan, kirim respons 404
     if (!user) {
       return res.status(404).json({ message: "User not found" });
     }
 
-    // Memperbarui data pengguna
     await user.update({
       first_name: f_name,
       last_name: l_name,
@@ -145,4 +152,5 @@ module.exports = {
   deleteUsers,
   restoreUsers,
   updateUser,
+  getUserById,
 };
