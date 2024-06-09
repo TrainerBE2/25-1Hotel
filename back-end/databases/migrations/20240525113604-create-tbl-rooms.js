@@ -49,7 +49,6 @@ module.exports = {
       },
     });
   },
-  async down(queryInterface, Sequelize) {
-    await queryInterface.dropTable("tbl_rooms");
-  },
+
+  down: async (queryInterface, Sequelize) => {},
 };

@@ -10,8 +10,12 @@ var indexRouter = require("./routes/index");
 var usersRouter = require("./routes/users");
 var reservationRouter = require("./routes/reservations");
 var reviewRouter = require("./routes/review");
+var roomsRouter = require("./routes/rooms");
+var facilitiesRouter = require("./routes/facilities");
+var roomscatRouter = require("./routes/roomscat");
 var gallariesRouter = require("./routes/gallaries");
 var corsOptions = { origin: "http://localhost:3000" };
+
 var app = express();
 
 app.use(cors(corsOptions));
@@ -22,8 +26,8 @@ app.use(cookieParser());
 app.use(express.static(path.join(__dirname, "public")));
 
 app.use("/", indexRouter);
-app.use("/api/v1/user", usersRouter);
-app.use("/api/v1/reservation", reservationRouter);
-app.use("/api/v1/review", reviewRouter);
-app.use("/api/v1/upload", gallariesRouter);
+app.use("/api/v1", usersRouter);
+app.use("/api/v1", reservationRouter);
+app.use("/api/v1", reviewRouter);
+
 module.exports = app;
