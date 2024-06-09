@@ -6,7 +6,7 @@ yarn-error.log*
 
 # Environment variables
 .env
-backend/.env
+back-end/.env
 .drawio
 # Logs
 logs/
