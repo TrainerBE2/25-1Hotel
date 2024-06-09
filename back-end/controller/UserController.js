@@ -50,24 +50,40 @@ const createUser = async (req, res, next) => {
 
 const getAllUsers = async (req, res, next) => {
   try {
-    const page = parseInt(req.query.page) || 1;
-    const limit = parseInt(req.query.limit) || 10;
+    const page = parseInt(req.query.page, 10) || 1;
+    const limit = parseInt(req.query.limit, 10) || 10;
     const totalCount = await tbl_users.count();
     const offset = (page - 1) * limit;
+
     const users = await tbl_users.findAll({
       offset,
       limit,
+      order: [["createdAt", "ASC"]],
     });
+
     const response = {
       total_page: Math.ceil(totalCount / limit),
       current_page: page,
       total_users: totalCount,
+      count: users.length,
       users,
     };
-    res.status(200).json(response);
+
+    return res.status(200).json(response);
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    return res.status(500).json({ message: error.message });
   }
+};
+
+const getUserById = async (req, res, next) => {
+  try {
+    const id = req.params.id;
+    const user = await tbl_users.findByPk(id);
+    if (!user) {
+      return res(404).json({ message: "User Not Found" });
+    }
+    res.status(200).json(user);
+  } catch (error) {}
 };
 
 const deleteUsers = async (req, res, next) => {
@@ -114,7 +130,6 @@ const updateUser = async (req, res, next) => {
       return res.status(404).json({ message: "User not found" });
     }
 
-    // Memperbarui data pengguna
     await user.update({
       first_name: f_name,
       last_name: l_name,
@@ -137,4 +152,5 @@ module.exports = {
   deleteUsers,
   restoreUsers,
   updateUser,
+  getUserById,
 };

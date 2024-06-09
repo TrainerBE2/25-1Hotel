@@ -5,10 +5,16 @@ const {
   createReview,
   getAllReview,
   archiveReview,
+  restoreReview,
+  editReview,
+  getReviewsByRoomOrUserId,
 } = require("../controller/ReviewController");
 
-router.get("/review", getAllReview);
-router.post("/review", createReview);
-router.put("/review", archiveReview);
+router.get("", getAllReview);
+router.get("/room", getReviewsByRoomOrUserId);
+router.post("", createReview);
+router.put("/hide", archiveReview);
+router.put("/restore", restoreReview);
+router.put("/edit", editReview);
 
 module.exports = router;
