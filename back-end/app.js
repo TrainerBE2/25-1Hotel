@@ -9,10 +9,9 @@ var indexRouter = require("./routes/index");
 var usersRouter = require("./routes/users");
 var reservationRouter = require("./routes/reservations");
 var reviewRouter = require("./routes/review");
-var roomsRouter = require('./routes/rooms');
-var galleriesRouter = require('./routes/galleries');
-var facilitiesRouter = require('./routes/facilities');
-var roomscatRouter = require('./routes/roomscat');
+var roomsRouter = require("./routes/rooms");
+var facilitiesRouter = require("./routes/facilities");
+var roomscatRouter = require("./routes/roomscat");
 
 var app = express();
 
@@ -26,9 +25,8 @@ app.use("/", indexRouter);
 app.use("/api/v1", usersRouter);
 app.use("/api/v1", reservationRouter);
 app.use("/api/v1", reviewRouter);
-app.use('/rooms', roomsRouter);
-app.use('/galleries', galleriesRouter);
-app.use('/facilities', facilitiesRouter);
-app.use('/roomscat', roomscatRouter);
+app.use("/rooms", roomsRouter);
+app.use("/facilities", facilitiesRouter);
+app.use("/roomscat", roomscatRouter);
 
 module.exports = app;
