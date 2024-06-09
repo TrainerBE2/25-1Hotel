@@ -6,6 +6,7 @@ yarn-error.log*
 
 # Environment variables
 .env
+backend/.env
 .drawio
 # Logs
 logs/
@@ -26,6 +27,7 @@ coverage/
 # Dependency directories
 bower_components/
 jspm_packages/
+
 # Optional npm cache directory
 .npm
 
