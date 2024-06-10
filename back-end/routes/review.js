@@ -11,8 +11,9 @@ const {
 } = require("../controller/ReviewController");
 
 router.get("", getAllReview);
-router.get("/room", getReviewsByRoomOrUserId);
 router.post("", createReview);
+router.get("/room", getReviewsByRoomOrUserId);
+router.get("/user", getReviewsByRoomOrUserId);
 router.put("/hide", archiveReview);
 router.put("/restore", restoreReview);
 router.put("/edit", editReview);
