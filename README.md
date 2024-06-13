@@ -10,20 +10,28 @@ Backend service for hotel reservation system using Node.js, Express, and Sequeli
 
 ## Getting Started
 
-### Clone the Repository
+### 1 Clone the Repository
 
 ```bash
 cd backend
-Install Dependencies
-bash
-Copy code
+```
+
+### 2 Install Dependencies
+
+```bash
 npm install
-Setup Environment Variables
+```
+
+### 3 Create Env
+
+```bash
 Copy the .env.example file to create a .env file:
-bash
 Copy code
 cp .env.example .env
 Open the .env file and update the environment variables according to your setup.
+```
+
+```bash
 plaintext
 Copy code
 # .env.example
@@ -46,23 +54,27 @@ MIDTRANS_API_URL=your_midtrans_api_url
 
 # Other
 FRONT_END_URL=your_front_end_url
+```
+
 Database Setup
 Make sure your PostgreSQL (or any other SQL database) is running and accessible.
 
-Run Migrations
-bash
-Copy code
-npx sequelize-cli db:migrate
-Seed the Database (optional)
-bash
-Copy code
-npx sequelize-cli db:seed:all
-Start the Server
-bash
-Copy code
-npm start
-The server will start on the port defined in your .env file (default is 3000).
+### 4 Run Migrations
 
+```bash
+npx sequelize-cli db:migrate
+npx sequelize-cli db:seed:all (For Testing)
+```
+
+### 5 Start Server
+
+Start the Server
+
+```bash
+npm start
+```
+
+The server will start on the port defined in your .env file (default is 3000).
 
 API Documentation
 You can find the API documentation in the docs directory or visit the API Documentation after running the server.
@@ -72,5 +84,3 @@ Contributions are welcome! Please submit a pull request or open an issue to disc
 
 License
 This project is licensed under the MIT License - see the LICENSE file for details.
-
-```
