@@ -18,11 +18,11 @@ var { keyGenerator, secretKey, secretKey } = require("./utils/helper");
 const authRoutes = require("./routes/auth");
 const authMiddleware = require("./middleware/authMiddleware");
 
-var corsOptions = { origin: "http://localhost:3000" }; // Sesuaikan dengan frontend Anda
+// var corsOptions = { origin: "http://localhost:8000" };
 
 var app = express();
 
-app.use(cors(corsOptions));
+app.use(cors());
 app.use(logger("dev"));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
@@ -30,13 +30,13 @@ app.use(cookieParser());
 app.use(express.static(path.join(__dirname, "public")));
 
 app.use("/", indexRouter);
-app.use("/api/v1/users", authMiddleware, usersRouter);
+app.use("/api/v1/users", usersRouter);
 app.use("/api/v1/reservation", reservationRouter);
-app.use("/api/v1/review", authMiddleware, reviewRouter);
+app.use("/api/v1/review", reviewRouter);
 app.use("/api/v1/rooms", roomsRouter);
 app.use("/api/v1/facilities", facilitiesRouter);
 app.use("/api/v1/roomscat", roomscatRouter);
-app.use("/api/v1/gallaries", gallariesRouter);
+app.use("/api/v1/upload", gallariesRouter);
 app.use("/api/v1/auth", authRoutes);
 app.use("/api/v1/key-secret", (req, res) => {
   const secretKey = keyGenerator();
@@ -46,8 +46,6 @@ app.use("/api/v1/JWT", (req, res) => {
   const secretKey = secretKey();
   res.json({ secretKey });
 });
-
-// Mulai koneksi ke database
 sequelize
   .authenticate()
   .then(() => {

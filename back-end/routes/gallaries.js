@@ -1,7 +1,7 @@
 var express = require("express");
 var router = express.Router();
 const {
-  uploadRoomImage,
+  uploadRoomImages,
   uploadUserImage,
 } = require("../controller/GallariesController");
 /* GET users listing. */
@@ -9,7 +9,6 @@ const {
 //   res.send("respond with a resource");
 // });
 
-router.post("/room", uploadRoomImage);
-router.post("/user", uploadRoomImage);
+router.post("/room", uploadRoomImages);
 
 module.exports = router;

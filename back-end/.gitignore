@@ -19,6 +19,7 @@ pids/
 #tambahan
 .jpg
 .png
+.jpeg
 
 # Coverage directories
 coverage/

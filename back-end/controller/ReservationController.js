@@ -1,3 +1,4 @@
+const { DOUBLE } = require("sequelize");
 const {
   tbl_transactions,
   tbl_payments,
@@ -6,16 +7,77 @@ const {
   tbl_rooms,
   sequelize,
 } = require("../databases/models");
+const {
+  MIDTRANS_SERVER_KEY,
+  FRONT_END_URL,
+  MIDTRANS_APP_URL,
+  PENDING_PAYMENT,
+} = require("../utils/constant");
 
 const { generateTransactionId } = require("../utils/helper");
+const {
+  sendErrorResponse,
+  sendSuccessResponse,
+} = require("../utils/responseHandler");
+
 const createReservation = async (req, res) => {
   const transaction = await sequelize.transaction();
   try {
-    const { user_id, room_id, d_in, d_out, total_payment } = req.body;
+    const { user_id, room_id, d_in, d_out } = req.body;
+    const roomDetail = await tbl_rooms.findByPk(room_id);
+    const userDetail = await tbl_users.findByPk(user_id);
+    if (!roomDetail) {
+      return sendErrorResponse(res, 400, "Room Not Found");
+    } else if (!userDetail) {
+      return sendErrorResponse(res, 400, "User Not Found");
+    }
     const reservationId = generateTransactionId("INV/");
     const payId = generateTransactionId("PAY/");
     const transId = generateTransactionId("TXN/");
-    //insert into tbl reservation
+    const calculateNights = (startDate, endDate) => {
+      const start = new Date(startDate);
+      const end = new Date(endDate);
+      const nights = (end - start) / (1000 * 60 * 60 * 24);
+      return nights;
+    };
+    const grossAmount = roomDetail.price * calculateNights(d_in, d_out);
+    /* 
+      Midtrans Integration
+    */
+    const authString = btoa(`${MIDTRANS_SERVER_KEY}:`);
+    const payload = {
+      transaction_details: { order_id: transId, grossAmount },
+      item_details: {
+        id: room_id,
+        price: roomDetail.price,
+        quantity: calculateNights(d_in, d_out),
+        name: roomDetail.name,
+      },
+      customer_detaila: {
+        first_name: userDetail.first_name,
+        last_name: userDetail.last_name,
+        email: userDetail.email,
+      },
+      callbacks: {
+        finish: `${FRONT_END_URL}/order-status?transaction_id=${transId}`,
+        error: `${FRONT_END_URL}/order-status?transaction_id=${transId}`,
+        pending: `${FRONT_END_URL}/order-status?transaction_id=${transId}`,
+      },
+    };
+
+    const response = await fetch(`${MIDTRANS_APP_URL}/snap/v1/transactions`, {
+      method: post,
+      headers: {
+        "Content-Type": "application/json",
+        Accept: "application/json",
+        Authorization: `Basic ${authString}`,
+      },
+      body: JSON.stringify(payload),
+    });
+    if (response.status !== 201) {
+      return sendErrorResponse(res, 500, "Failed to create transaction");
+    }
+    const data = await response.json();
     const booking = await tbl_reservations.create(
       {
         reservation_id: reservationId,
@@ -23,7 +85,7 @@ const createReservation = async (req, res) => {
         room_id: room_id,
         date_in: d_in,
         date_out: d_out,
-        total_payment: total_payment,
+        total_payment: grossAmount,
       },
       { transaction }
     );
@@ -50,10 +112,18 @@ const createReservation = async (req, res) => {
       },
       { transaction }
     );
-
     await transaction.commit();
-
-    res.status(201).json(booking, payment, transactionRecord);
+    sendSuccessResponse(res, 201, "succes", {
+      data: {
+        id: reservationId,
+        status: PENDING_PAYMENT,
+        first_name: userDetail.first_name,
+        last_name: userDetail.last_name,
+        email: userDetail.email,
+        snap_token: data.token,
+        snap_redirect_url: data.redirect_url,
+      },
+    });
   } catch (error) {
     await transaction.rollback();
     res.status(500).json({ message: error.message });

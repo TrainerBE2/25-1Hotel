@@ -2,6 +2,10 @@ const bcrypt = require("bcrypt");
 const { parse } = require("dotenv");
 const { tbl_users } = require("../databases/models");
 const Op = require("sequelize");
+const {
+  sendSuccessResponse,
+  sendErrorResponse,
+} = require("../utils/responseHandler");
 
 const createUser = async (req, res, next) => {
   try {
@@ -17,36 +21,11 @@ const createUser = async (req, res, next) => {
       role: status,
       token: token,
     });
-    res.status(201).json(newUser);
+    sendSuccessResponse(res, 201, "User created successfully", newUser);
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    sendErrorResponse(res, 500, error.message);
   }
 };
-// const createUser = async (req, res, next) => {
-//     try {
-//         const users = req.body;  // Assuming req.body is an array of user objects
-
-//         // Hash passwords for all users
-//         const usersWithHashedPasswords = await Promise.all(users.map(async user => {
-//             const hashedPassword = await bcrypt.hash(user.password, 10);
-//             return {
-//                 ...user,
-//                 password: hashedPassword
-//             };
-//         }));
-
-//         // Perform bulk insert
-//         const newUsers = await tbl_users.bulkCreate(usersWithHashedPasswords);
-
-//         res.status(201).json(newUsers);
-//     } catch (error) {
-//         if (error.name === 'SequelizeUniqueConstraintError') {
-//             res.status(400).json({ message: 'One or more emails or phone numbers already exist' });
-//         } else {
-//             res.status(500).json({ message: error.message });
-//         }
-//     }
-// };
 
 const getAllUsers = async (req, res, next) => {
   try {
@@ -69,9 +48,9 @@ const getAllUsers = async (req, res, next) => {
       users,
     };
 
-    return res.status(200).json(response);
+    sendSuccessResponse(res, 200, "OK", response);
   } catch (error) {
-    return res.status(500).json({ message: error.message });
+    sendErrorResponse(res, 500, error.message);
   }
 };
 
@@ -80,10 +59,13 @@ const getUserById = async (req, res, next) => {
     const id = req.params.id;
     const user = await tbl_users.findByPk(id);
     if (!user) {
-      return res(404).json({ message: "User Not Found" });
+      sendErrorResponse(res, 404, "User not found");
+    } else {
+      sendSuccessResponse(res, 200, "OK", user);
     }
-    res.status(200).json(user);
-  } catch (error) {}
+  } catch (error) {
+    sendErrorResponse(res, 500, error.message);
+  }
 };
 
 const deleteUsers = async (req, res, next) => {
@@ -94,12 +76,12 @@ const deleteUsers = async (req, res, next) => {
       { where: { user_id: id } }
     );
     if (deleteUser[0] === 1) {
-      res.status(200).json({ message: "User archived successfully" });
+      sendSuccessResponse(res, 200, "User archived successfully");
     } else {
-      res.status(404).json({ message: "User not found" });
+      sendErrorResponse(res, 404, "User not found");
     }
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    sendErrorResponse(res, 500, error.message);
   }
 };
 
@@ -111,12 +93,12 @@ const restoreUsers = async (req, res, next) => {
       { where: { user_id: id } }
     );
     if (User[0] === 1) {
-      res.status(200).json({ message: "User restored successfully" });
+      sendSuccessResponse(res, 200, "User restored successfully");
     } else {
-      res.status(404).json({ message: "User not found" });
+      sendErrorResponse(res, 404, "User not found");
     }
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    sendErrorResponse(res, 500, error.message);
   }
 };
 
@@ -127,24 +109,27 @@ const updateUser = async (req, res, next) => {
     const user = await tbl_users.findByPk(userId);
 
     if (!user) {
-      return res.status(404).json({ message: "User not found" });
+      sendErrorResponse(res, 404, "User not found");
+    } else {
+      await user.update({
+        first_name: f_name,
+        last_name: l_name,
+        email: email,
+        phone_number: phone,
+        password: password,
+        role: status,
+        token: token,
+      });
+      sendSuccessResponse(res, 200, "User updated successfully");
     }
-
-    await user.update({
-      first_name: f_name,
-      last_name: l_name,
-      email: email,
-      phone_number: phone,
-      password: password,
-      role: status,
-      token: token,
-    });
-
-    res.status(200).json({ message: "User updated successfully" });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    sendErrorResponse(res, 500, error.message);
   }
 };
+
+/* 
+  Jangan lupa buat fitur foto profil pengguna, model, migrasi, controller
+*/
 
 module.exports = {
   createUser,

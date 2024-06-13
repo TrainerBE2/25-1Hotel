@@ -1,14 +1,17 @@
 const multer = require("multer");
 const path = require("path");
 const moment = require("moment");
+
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
     let uploadPath;
 
-    if (file.fieldname === "roomImage") {
+    if (file.fieldname === "roomImages") {
       uploadPath = path.join(__dirname, "../public/uploads/rooms/");
-    } else if (file.fieldname === "userImage") {
+    } else if (file.fieldname === "userImages") {
       uploadPath = path.join(__dirname, "../public/uploads/user/");
+    } else {
+      return cb(new Error("Invalid file fieldname"));
     }
 
     cb(null, uploadPath);
