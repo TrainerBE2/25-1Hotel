@@ -1,4 +1,4 @@
-const originalId = "RVW/1717277708221/2lV8j";
+const originalId = "INV/1717398300402/iprQi";
 const encodedId = encodeURIComponent(originalId);
 
 console.log(`Encoded ID: ${encodedId}`);
