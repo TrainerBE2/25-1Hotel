@@ -12,8 +12,8 @@ module.exports = {
     const transaction = await queryInterface.sequelize.transaction();
     try {
       // Loop untuk membuat 7 catatan reservasi
-      for (let i = 4; i < 11; i++) {
-        const user_id = `usr-${i}`;
+      for (let i = 1; i < 10; i++) {
+        const user_id = i;
         const room_id = `A-${i}`;
         const d_in = new Date("2024-06-01");
         const d_out = new Date("2024-06-03");

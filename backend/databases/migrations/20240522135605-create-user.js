@@ -5,9 +5,9 @@ module.exports = {
     await queryInterface.createTable("tbl_users", {
       user_id: {
         allowNull: false,
-        autoIncrement: false,
+        autoIncrement: true,
         primaryKey: true,
-        type: Sequelize.STRING,
+        type: Sequelize.INTEGER,
       },
       first_name: {
         type: Sequelize.STRING,
@@ -30,7 +30,7 @@ module.exports = {
         allowNull: false,
         defaultValue: "user",
       },
-      token: {
+      verification_token: {
         type: Sequelize.STRING,
         allowNull: true,
       },
