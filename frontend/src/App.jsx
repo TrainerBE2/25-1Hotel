@@ -1,6 +1,7 @@
-import { Routes, Route } from "react-router-dom"; 
-import Navbar from "./component/NavbarComponent";
-import Footer from "./component/Footer";
+import { Routes, Route } from "react-router-dom";
+import NavbarComp from "./component/dashboard/NavbarComp";
+import Hero from "./component/dashboard/Hero";
+import Footer from "./component/dashboard/Footer";
 import Home from "./pages/Home";
 import About from "./pages/About";
 import Service from "./pages/Service";
@@ -9,18 +10,21 @@ import Rooms from "./pages/Rooms";
 import Pages from "./pages/Pages";
 
 function App() {
-  return <div>
-    <Navbar />
-    <Routes>
-      <Route path="/" Component={Home}/>
-      <Route path="/about" Component={About}/>
-      <Route path="/service" Component={Service}/>
-      <Route path="/contact" Component={Contact}/>
-      <Route path="/Rooms" Component={Rooms}/>
-      <Route path="/Pages" Component={Pages}/>
-    </Routes>
-    <Footer />
-  </div>
+  return (
+    <div>
+      <NavbarComp />
+      <Hero />
+      <Routes>
+        <Route path="/" element={<Home />} />
+        <Route path="/about" element={<About />} />
+        <Route path="/service" element={<Service />} />
+        <Route path="/contact" element={<Contact />} />
+        <Route path="/rooms" element={<Rooms />} />
+        <Route path="/pages" element={<Pages />} />
+      </Routes>
+      <Footer />
+    </div>
+  );
 }
 
 export default App;
