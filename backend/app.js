@@ -36,7 +36,7 @@ app.use("/api/v1/review", reviewRouter);
 app.use("/api/v1/rooms", roomsRouter);
 app.use("/api/v1/facilities", facilitiesRouter);
 app.use("/api/v1/roomscat", roomscatRouter);
-app.use("/api/v1/upload", gallariesRouter);
+app.use("/api/v1/gallaries", gallariesRouter);
 app.use("/api/v1/auth", authRoutes);
 app.use("/api/v1/key-secret", (req, res) => {
   const secretKey = keyGenerator();

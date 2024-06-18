@@ -9,7 +9,7 @@ const {
   sendErrorResponse,
 } = require("../utils/responseHandler");
 
-const JWT_SECRET = 'eyJhbGciOiJIUzI1NiJ9.eyJSb2xlIjoiQWRtaW4iLCJVc2VybmFtZSI6IkFkbWluIiwiZXhwIjoxNzE4NjU0ODMzLCJpYXQiOjE3MTg2NTQ4MzN9.zzQMu0SYMVVueY3PLRmFBEX_4pb778TX69o_Z3FjyOk';
+const JWT_SECRET = 'f89f004efa04026db9f9ddec4fad92ef77598f41ca62404ceef160fe26f6f318';
 
 const createUser = async (req, res, next) => {
   try {
@@ -164,6 +164,27 @@ const updateUser = async (req, res, next) => {
   }
 };
 
+const changePass = async (req, res, next) => {
+  try {
+    const userId = req.params.id;
+    const {  password  } = req.body;
+    const user = await tbl_users.findByPk(userId);
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    if (!user) {
+      sendErrorResponse(res, 404, "User not found");
+    } else {
+      await user.update({
+        password: hashedPassword,
+      });
+      sendSuccessResponse(res, 200, "User updated successfully");
+    }
+  } catch (error) {
+    sendErrorResponse(res, 500, error.message);
+  }
+};
+
 /* 
   Jangan lupa buat fitur foto profil pengguna, model, migrasi, controller
 */
@@ -175,4 +196,5 @@ module.exports = {
   restoreUsers,
   updateUser,
   getUserById,
+  changePass
 };
