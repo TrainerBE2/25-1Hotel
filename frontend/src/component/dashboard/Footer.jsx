@@ -43,7 +43,7 @@ const Footer = () => {
               <div className="footer__about">
                 <div className="footer__logo">
                   <a href="#">
-                    <img src="/img/logo.png" alt="" />
+                    <img src="/img/logo-rara.png" alt="" />
                   </a>
                 </div>
                 <h4>(123) 456-78-91096</h4>

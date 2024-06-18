@@ -1,4 +1,5 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
+
 const Hero = () => {
   return (
     <>
@@ -7,17 +8,10 @@ const Hero = () => {
           <div className="row">
             <div className="col-lg-12">
               <div className="hero__text">
-                <h5>WELCOME HIROTO</h5>
+                <h5>WELCOME TO RARA</h5>
                 <h2>Experience the greatest for your holidays.</h2>
               </div>
               <form action="#" className="filter__form">
-                <div className="filter__form__item filter__form__item--search">
-                  <p>Location</p>
-                  <div className="filter__form__input">
-                    <input type="text" placeholder="Search Location" />
-                    <span className="icon_search"></span>
-                  </div>
-                </div>
                 <div className="filter__form__item">
                   <p>Check In</p>
                   <div className="filter__form__datepicker">
@@ -35,13 +29,14 @@ const Hero = () => {
                   </div>
                 </div>
                 <div className="filter__form__item filter__form__item--select">
-                  <p>Person</p>
+                  <p>Room</p>
                   <div className="filter__form__select">
                     <span className="icon_group"></span>
                     <select>
-                      <option value="">2 Adult, 1 Children</option>
-                      <option value="">2 Adult</option>
-                      <option value="">1 Adult</option>
+                      <option value="">Pilih Kamar</option>
+                      <option value="1">Pilih Kamar 1</option>
+                      <option value="2">Pilih Kamar 2</option>
+                      <option value="3">Pilih Kamar 3</option>
                     </select>
                   </div>
                 </div>
@@ -59,7 +54,7 @@ const Hero = () => {
               <div className="home__about__text">
                 <div className="section-title">
                   <h5>ABOUT US</h5>
-                  <h2>Welcome Hiroto Hotel In Street L’Abreuvoir</h2>
+                  <h2>Welcome Rara Hotel In Street L’Abreuvoir</h2>
                 </div>
                 <p className="first-para">
                   Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut
