@@ -1,6 +1,7 @@
 import { eventListeners } from "@popperjs/core";
 import React, { useEffect } from "react";
 import { Link, Navigate, useLocation } from "react-router-dom"; // Impor Link dari react-router-dom untuk navigasi internal // Pastikan gambar logo diimpor dengan benar
+import MainComponent from "../../assets/js/main";
 
 const NavbarComp = () => {
   const location = useLocation();
@@ -10,6 +11,7 @@ const NavbarComp = () => {
   };
   return (
     <>
+      <MainComponent />
       <div id="preloder">
         <div className="loader"></div>
       </div>

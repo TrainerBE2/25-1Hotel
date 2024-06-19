@@ -11,6 +11,8 @@ import Contact from "./pages/Contact";
 import Rooms from "./pages/Rooms";
 import Pages from "./pages/Pages";
 import Layout from "./Layout/layout";
+import Login from "./pages/auth/Login";
+import Sidebar from "./component/admin/Sidebar";
 
 function App() {
   return (
@@ -65,6 +67,7 @@ function App() {
               </Layout>
             }
           />
+          <Route path="/auth/login" element={<Sidebar routes />} />
         </Routes>
       </GlobalProvider>
     </BrowserRouter>
