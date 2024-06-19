@@ -16,15 +16,10 @@ const createUser = async (req, res, next) => {
   try {
     const { id, f_name, l_name, email, phone, password, status } = req.body;
 
+    // Hash password sebelum menyimpannya ke database
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // Generate a verification token
-    const verificationToken = jwt.sign(
-      { email, f_name },
-      process.env.JWT_SECRET,
-      { expiresIn: "1d" }
-    );
-
+    // Membuat pengguna baru dalam tabel `tbl_users`
     const newUser = await tbl_users.create({
       user_id: id,
       first_name: f_name,
@@ -33,25 +28,56 @@ const createUser = async (req, res, next) => {
       phone_number: phone,
       password: hashedPassword,
       role: status,
-      verification_token: verificationToken, // Save verification token in database
     });
 
-    // Send verification email
-    const verificationUrl = `${req.protocol}://${req.get(
-      "host"
-    )}/api/v1/auth/verify-email?token=${verificationToken}`;
-
-    await sendVerificationEmail(email, verificationUrl);
-
-    sendSuccessResponse(
-      res,
-      201,
-      "User created successfully. Please verify your email."
-    );
+    // Mengirim respons sukses
+    sendSuccessResponse(res, 201, "User created successfully.");
   } catch (error) {
+    // Mengirim respons kesalahan
     sendErrorResponse(res, 500, error.message);
   }
 };
+
+// const createUser = async (req, res, next) => {
+//   try {
+//     const { id, f_name, l_name, email, phone, password, status } = req.body;
+
+//     const hashedPassword = await bcrypt.hash(password, 10);
+
+//     // Generate a verification token
+//     const verificationToken = jwt.sign(
+//       { email, f_name },
+//       process.env.JWT_SECRET,
+//       { expiresIn: "1d" }
+//     );
+
+//     const newUser = await tbl_users.create({
+//       user_id: id,
+//       first_name: f_name,
+//       last_name: l_name,
+//       email: email,
+//       phone_number: phone,
+//       password: hashedPassword,
+//       role: status,
+//       token: verificationToken, // Save verification token in database
+//     });
+
+//     // Send verification email
+//     const verificationUrl = `${req.protocol}://${req.get(
+//       "host"
+//     )}/api/v1/auth/verify-email?token=${verificationToken}`;
+
+//     await sendVerificationEmail(email, verificationUrl);
+
+//     sendSuccessResponse(
+//       res,
+//       201,
+//       "User created successfully. Please verify your email."
+//     );
+//   } catch (error) {
+//     sendErrorResponse(res, 500, error.message);
+//   }
+// };
 
 // Function to send verification email
 const sendVerificationEmail = async (email, verificationUrl) => {
