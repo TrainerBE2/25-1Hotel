@@ -9,11 +9,6 @@ const {
   getUserById,
 } = require("../controller/UserController");
 const authMidlleware = require("../middleware/authMiddleware");
-/* GET users listing. */
-// router.get("/", function (req, res, next) {
-//   res.send("respond with a resource");
-// });
-
 /* 
   Root Level
 */

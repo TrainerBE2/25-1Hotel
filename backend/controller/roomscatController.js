@@ -8,7 +8,7 @@ const getAllRoomsCat = async (req, res, next) => {
     const limit = parseInt(req.query.limit) || 10;
     const totalCount = await tbl_rooms_categories.count();
     const offset = (page - 1) * limit;
-    const users = await tbl_rooms_categories.findAll({
+    const data = await tbl_rooms_categories.findAll({
       offset,
       limit,
     });
@@ -16,7 +16,7 @@ const getAllRoomsCat = async (req, res, next) => {
       total_page: Math.ceil(totalCount / limit),
       current_page: page,
       total_users: totalCount,
-      users,
+      data,
     };
     res.status(200).json(response);
   } catch (error) {

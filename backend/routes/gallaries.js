@@ -3,12 +3,18 @@ var router = express.Router();
 const {
   uploadRoomImages,
   uploadUserImage,
+  deleteImageById,
+  updateImageById,
+  getAllImagesByRoomId,
 } = require("../controller/GallariesController");
-/* GET users listing. */
-// router.get("/", function (req, res, next) {
-//   res.send("respond with a resource");
-// });
-
-router.post("/room", uploadRoomImages);
+const authMiddleware = require("../middleware/authMiddleware");
+router.post("/room", authMiddleware(["root", "admin"]), uploadRoomImages);
+router.delete("/room", authMiddleware(["root", "admin"]), deleteImageById);
+router.put("/room", authMiddleware(["root", "admin"]), updateImageById);
+router.get(
+  "/room/:room_id",
+  authMiddleware(["root", "admin"]),
+  getAllImagesByRoomId
+);
 
 module.exports = router;

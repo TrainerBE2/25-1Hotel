@@ -3,6 +3,10 @@ const bcrypt = require("bcrypt");
 const { tbl_users, Sequelize } = require("../databases/models");
 const { Op } = Sequelize;
 require("dotenv").config();
+const {
+  sendErrorResponse,
+  sendSuccessResponse,
+} = require("../utils/responseHandler");
 
 const register = async (req, res) => {
   const { username, email, password } = req.body;
@@ -17,7 +21,7 @@ const register = async (req, res) => {
       },
     });
     if (userExists) {
-      return res.status(400).json({ message: "User already registered." });
+      return sendErrorResponse(res, 400, "User already registered.");
     }
 
     // Hash password
@@ -30,12 +34,13 @@ const register = async (req, res) => {
       email,
       password: hashedPassword,
     });
-    res
-      .status(201)
-      .json({ message: "User registered successfully.", user: newUser });
+
+    return sendSuccessResponse(res, 201, "User registered successfully.", {
+      user: newUser,
+    });
   } catch (error) {
     console.error("Error during registration:", error);
-    res.status(500).json({ message: "Server error", error: error.message });
+    return sendErrorResponse(res, 500, "Server error", error.message);
   }
 };
 
@@ -52,13 +57,13 @@ const login = async (req, res) => {
       },
     });
     if (!user) {
-      return res.status(400).json({ message: "Invalid email or password." });
+      return sendErrorResponse(res, 400, "Invalid email or password.");
     }
 
     // Validate password
     const validPassword = await bcrypt.compare(password, user.password);
     if (!validPassword) {
-      return res.status(400).json({ message: "Invalid email or password." });
+      return sendErrorResponse(res, 400, "Invalid email or password.");
     }
 
     // Generate token
@@ -70,20 +75,14 @@ const login = async (req, res) => {
       }
     );
 
-    res.json({
-      status: 200,
+    return sendSuccessResponse(res, 200, "Login successful.", {
       token,
-      user: {
-        id: user.user_id,
-        email: user.email,
-        role: user.role,
-        JWT: process.env.JWT_SECRET,
-        // Note: For security reasons, you should never include the password in the response.
-      },
+      email: user.email,
+      role: user.role,
     });
   } catch (error) {
     console.error("Error during login:", error);
-    res.status(500).json({ message: "Server error", error: error.message });
+    return sendErrorResponse(res, 500, "Server error", error.message);
   }
 };
 

@@ -8,14 +8,27 @@ const {
   restoreReview,
   editReview,
   getReviewsByRoomOrUserId,
+  getReviewsByRoomId,
+  getReviewsByUserId,
 } = require("../controller/ReviewController");
+const authMiddleware = require("../middleware/authMiddleware");
+const { getRoomByID } = require("../controller/roomController");
 
-router.get("", getAllReview);
-router.post("", createReview);
-router.get("/room", getReviewsByRoomOrUserId);
-router.get("/user", getReviewsByRoomOrUserId);
-router.put("/hide", archiveReview);
-router.put("/restore", restoreReview);
-router.put("/edit", editReview);
-
+router.get("", authMiddleware(["admin", "root"]), getAllReview);
+router.post("", authMiddleware(["user"]), createReview);
+router.put("/hide", authMiddleware(["admin", "user", "root"]), archiveReview);
+router.put(
+  "/restore",
+  authMiddleware(["admin", "user", "root"]),
+  restoreReview
+);
+router.put("/edit", authMiddleware(["admin", "user", "root"]), editReview);
+router.get(
+  "/room-user",
+  authMiddleware(["admin", "user", "root"]),
+  getReviewsByUserId
+);
+/* Route Public Start */
+router.get("/room", getReviewsByRoomId);
+/* Route Public End */
 module.exports = router;

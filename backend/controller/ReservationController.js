@@ -68,7 +68,7 @@ const createReservation = async (req, res, next) => {
           id: room_id,
           price: roomDetail.price,
           quantity: calculateNights(d_in, d_out),
-          name: roomDetail.name,
+          name: `Night of ${roomDetail.name}`,
         },
       ],
       customer_details: {
@@ -116,7 +116,7 @@ const createReservation = async (req, res, next) => {
       {
         payment_id: payId,
         user_id,
-        method: "Debit",
+        method: "VA",
         amount: grossAmount,
         status: PENDING_PAYMENT,
       },

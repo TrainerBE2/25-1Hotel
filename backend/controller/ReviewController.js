@@ -89,7 +89,7 @@ const restoreReview = async (req, res) => {
     const { id } = req.query;
     const decodeId = decodeURIComponent(id);
     const review = await tbl_reviews.update(
-      { archived: 1 },
+      { archived: 0 },
       { where: { review_id: decodeId } }
     );
     if (review[0] === 1) {
@@ -123,17 +123,14 @@ const editReview = async (req, res) => {
   }
 };
 
-const getReviewsByRoomOrUserId = async (req, res) => {
+const getReviewsByUserId = async (req, res) => {
   try {
-    const { user_id, room_id } = req.query;
+    const { user_id } = req.query;
     const page = parseInt(req.query.page, 10) || 1;
     const limit = parseInt(req.query.limit, 10) || 10;
     const offset = (page - 1) * limit;
 
-    const whereCondition = {};
-    if (user_id) {
-      whereCondition.user_id = user_id;
-    }
+    const whereCondition = { user_id };
 
     const includeCondition = [
       {
@@ -148,12 +145,51 @@ const getReviewsByRoomOrUserId = async (req, res) => {
       },
     ];
 
-    if (room_id) {
-      includeCondition[1].where = { room_id };
-    }
-
     const { count, rows: reviewList } = await tbl_reviews.findAndCountAll({
       where: whereCondition,
+      offset,
+      limit,
+      include: includeCondition,
+    });
+
+    const response = {
+      total_page: Math.ceil(count / limit),
+      current_page: page,
+      total_review: count,
+      review_list: reviewList,
+    };
+
+    res.status(200).json(response);
+  } catch (error) {
+    console.error(error);
+    res
+      .status(500)
+      .json({ message: "Internal server error", error: error.message });
+  }
+};
+
+const getReviewsByRoomId = async (req, res) => {
+  try {
+    const { room_id } = req.query;
+    const page = parseInt(req.query.page, 10) || 1;
+    const limit = parseInt(req.query.limit, 10) || 10;
+    const offset = (page - 1) * limit;
+
+    const includeCondition = [
+      {
+        model: tbl_users,
+        as: "user",
+        attributes: ["first_name", "last_name"],
+      },
+      {
+        model: tbl_reservations,
+        as: "reservation",
+        where: { room_id },
+        attributes: ["room_id", "createdAt"],
+      },
+    ];
+
+    const { count, rows: reviewList } = await tbl_reviews.findAndCountAll({
       offset,
       limit,
       include: includeCondition,
@@ -181,5 +217,6 @@ module.exports = {
   archiveReview,
   restoreReview,
   editReview,
-  getReviewsByRoomOrUserId,
+  getReviewsByRoomId,
+  getReviewsByUserId,
 };
