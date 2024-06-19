@@ -1,4 +1,6 @@
 const bcrypt = require("bcrypt");
+const nodemailer = require('nodemailer');
+const jwt = require('jsonwebtoken');
 const { parse } = require("dotenv");
 const { tbl_users } = require("../databases/models");
 const Op = require("sequelize");
@@ -7,24 +9,59 @@ const {
   sendErrorResponse,
 } = require("../utils/responseHandler");
 
+const JWT_SECRET = 'f89f004efa04026db9f9ddec4fad92ef77598f41ca62404ceef160fe26f6f318';
+
 const createUser = async (req, res, next) => {
   try {
-    const { id, f_name, l_name, email, phone, password, status, token } =
-      req.body;
+    const { id, f_name, l_name, email, phone, password, status } = req.body;
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    // Generate a verification token
+    const verificationToken = jwt.sign({ email, f_name }, process.env.JWT_SECRET, { expiresIn: '1d' });
+
     const newUser = await tbl_users.create({
       user_id: id,
       first_name: f_name,
       last_name: l_name,
       email: email,
       phone_number: phone,
-      password: password,
+      password: hashedPassword,
       role: status,
-      token: token,
+      verification_token: verificationToken, // Save verification token in database
     });
-    sendSuccessResponse(res, 201, "User created successfully", newUser);
+
+    // Send verification email
+    const verificationUrl = `${req.protocol}://${req.get('host')}/api/v1/auth/verify-email?token=${verificationToken}`;
+
+    await sendVerificationEmail(email, verificationUrl);
+
+    sendSuccessResponse(res, 201, "User created successfully. Please verify your email.");
   } catch (error) {
     sendErrorResponse(res, 500, error.message);
   }
+};
+
+// Function to send verification email
+const sendVerificationEmail = async (email, verificationUrl) => {
+  const transporter = nodemailer.createTransport({
+    host: 'smtp.gmail.com', // Gmail SMTP server
+    port: 465, // Secure SMTP
+    secure: true, // true for 465, false for other ports
+    auth: {
+      user: 'yovan211ix5@gmail.com', // Your email address
+      pass: 'dcqf dkyx giqh vjii', // Your password
+    },
+  });
+
+  const mailOptions = {
+    from: process.env.EMAIL_USER,
+    to: email,
+    subject: 'Verify your email address',
+    html: `<p>Please click <a href="${verificationUrl}">here</a> to verify your email address.</p>`,
+  };
+
+  await transporter.sendMail(mailOptions);
 };
 
 const getAllUsers = async (req, res, next) => {
@@ -127,6 +164,27 @@ const updateUser = async (req, res, next) => {
   }
 };
 
+const changePass = async (req, res, next) => {
+  try {
+    const userId = req.params.id;
+    const {  password  } = req.body;
+    const user = await tbl_users.findByPk(userId);
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    if (!user) {
+      sendErrorResponse(res, 404, "User not found");
+    } else {
+      await user.update({
+        password: hashedPassword,
+      });
+      sendSuccessResponse(res, 200, "User updated successfully");
+    }
+  } catch (error) {
+    sendErrorResponse(res, 500, error.message);
+  }
+};
+
 /* 
   Jangan lupa buat fitur foto profil pengguna, model, migrasi, controller
 */
@@ -138,4 +196,5 @@ module.exports = {
   restoreUsers,
   updateUser,
   getUserById,
+  changePass
 };

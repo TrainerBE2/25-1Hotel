@@ -2,8 +2,10 @@ var express = require("express");
 var router = express.Router();
 const {
   uploadRoomImages,
-  uploadUserImage,
-  deleteImageById,
+  getGallaries,
+  createGallaries,
+  updateGallaries,
+  deleteGallaries,
   updateImageById,
   getAllImagesByRoomId,
 } = require("../controller/GallariesController");
