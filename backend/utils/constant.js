@@ -7,6 +7,7 @@ const OCCUPIED = "Occupied";
 const MIDTRANS_SERVER_KEY = process.env.MIDTRANS_SERVER_KEY;
 const MIDTRANS_APP_URL = process.env.MIDTRANS_APP_URL;
 const MIDTRANS_API_URL = process.env.MIDTRANS_API_URL;
+const SECRET_KEY = process.env.SECRET_KEY;
 const FRONT_END_URL = "";
 
 module.exports = {
@@ -20,4 +21,5 @@ module.exports = {
   MIDTRANS_APP_URL,
   MIDTRANS_API_URL,
   FRONT_END_URL,
+  SECRET_KEY,
 };

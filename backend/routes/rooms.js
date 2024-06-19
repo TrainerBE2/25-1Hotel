@@ -6,15 +6,11 @@ const {
   updateRoom,
   getRoomByID,
 } = require("../controller/roomController");
+const authMiddleware = require("../middleware/authMiddleware");
 
-// router.get("/", function (req, res, next) {
-//   res.send("nice");
-// });
-
-// Define the route to fetch data
 router.get("/", getAllRooms);
 router.get("/:id", getRoomByID);
-router.post("/post", createRooms);
-router.put("/edit/:id", updateRoom);
+router.post("/post", authMiddleware(["admin", "root"]), createRooms);
+router.put("/edit/:id", authMiddleware(["admin", "root"]), updateRoom);
 
 module.exports = router;

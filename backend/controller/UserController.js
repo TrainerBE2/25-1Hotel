@@ -8,9 +8,9 @@ const {
   sendSuccessResponse,
   sendErrorResponse,
 } = require("../utils/responseHandler");
+const { SECRET_KEY } = require("../utils/constant");
 
-const JWT_SECRET =
-  "f89f004efa04026db9f9ddec4fad92ef77598f41ca62404ceef160fe26f6f318";
+const JWT_SECRET = SECRET_KEY;
 
 const createUser = async (req, res, next) => {
   try {

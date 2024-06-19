@@ -14,8 +14,9 @@ const {
   MIDTRANS_APP_URL,
   PENDING_PAYMENT,
 } = require("../utils/constant");
+const { Op } = require("sequelize");
 
-const { generateTransactionId } = require("../utils/helper");
+const { generateTransactionId, calculateNights } = require("../utils/helper");
 const {
   sendErrorResponse,
   sendSuccessResponse,
@@ -25,8 +26,6 @@ const createReservation = async (req, res, next) => {
   const transaction = await sequelize.transaction();
   try {
     const { user_id, room_id, d_in, d_out } = req.body;
-
-    // Validasi input
     if (!user_id || !room_id || !d_in || !d_out) {
       return sendErrorResponse(res, 400, "All fields are required");
     }
@@ -48,16 +47,7 @@ const createReservation = async (req, res, next) => {
     const payId = generateTransactionId("PAY/");
     const transId = generateTransactionId("TXN/");
 
-    const calculateNights = (startDate, endDate) => {
-      const start = new Date(startDate);
-      const end = new Date(endDate);
-      const nights = (end - start) / (1000 * 60 * 60 * 24);
-      return nights;
-    };
-
     const grossAmount = roomDetail.price * calculateNights(d_in, d_out);
-
-    // Integrasi Midtrans
     const authString = Buffer.from(`${MIDTRANS_SERVER_KEY}:`).toString(
       "base64"
     );
@@ -270,9 +260,136 @@ const getReservationById = async (req, res, next) => {
   }
 };
 
+const confirmBook = async (req, res, next) => {
+  try {
+    const { id } = req.query;
+    const decodeId = decodeURIComponent(id);
+
+    const reservation = await tbl_reservations.findOne({
+      where: { reservation_id: decodeId },
+    });
+
+    if (!reservation) {
+      return sendErrorResponse(
+        res,
+        404,
+        `Reservation with ID ${decodeId} not found`
+      );
+    }
+
+    const [affectedRows] = await tbl_reservations.update(
+      { status: "Confirmed" },
+      { where: { reservation_id: decodeId } }
+    );
+    if (affectedRows === 1) {
+      const transaction = await tbl_transactions.findOne({
+        where: { reservation_id: decodeId },
+      });
+      if (!transaction) {
+        return sendErrorResponse(
+          res,
+          404,
+          `Transaction with reservation ID ${decodeId} not found`
+        );
+      }
+      const [paymentAffectedRows] = await tbl_payments.update(
+        { status: "Paid" },
+        { where: { payment_id: transaction.payment_id } }
+      );
+      if (paymentAffectedRows === 1) {
+        sendSuccessResponse(res, 200, "Reservation has been confirmed", null);
+      } else {
+        sendErrorResponse(res, 500, "Failed to update payment status");
+      }
+    } else {
+      sendErrorResponse(
+        res,
+        404,
+        `Reservation with ID ${decodeId} not found or already confirmed`
+      );
+    }
+  } catch (error) {
+    next(error);
+  }
+};
+
+const getReservationHistory = async (req, res, next) => {
+  try {
+    const { user_id } = req.query;
+
+    if (!user_id) {
+      return sendErrorResponse(res, 400, "User ID is required");
+    }
+    const transactions = await tbl_transactions.findAll({
+      where: { user_id },
+    });
+    if (!transactions || transactions.length === 0) {
+      return sendSuccessResponse(
+        res,
+        200,
+        "No reservations found for this user",
+        []
+      );
+    }
+    let reservationHistory = [];
+    for (let transaction of transactions) {
+      const reservation = await tbl_reservations.findOne({
+        where: { reservation_id: transaction.reservation_id },
+      });
+
+      if (!reservation) {
+        continue;
+      }
+      const room = await tbl_rooms.findOne({
+        where: { room_id: reservation.room_id },
+      });
+
+      if (!room) {
+        continue;
+      }
+      const roomCategory = await tbl_rooms_categories.findOne({
+        where: { cat_id: room.cat_id },
+      });
+
+      if (!roomCategory) {
+        continue;
+      }
+      const checkInDate = new Date(reservation.date_in);
+      const checkOutDate = new Date(reservation.date_out);
+      const numberOfNights = calculateNights(checkInDate, checkOutDate);
+      const bookingDate = reservation.updated_at;
+      const totalPayment = reservation.total_payment;
+      const payment = await tbl_payments.findOne({
+        where: { payment_id: transaction.payment_id },
+      });
+      const method = payment.methode;
+      reservationHistory.push({
+        roomCategory: roomCategory.name,
+        numberOfNights,
+        bookingDate,
+        totalPayment,
+        paymentStatus: payment ? payment.status : "Not Available",
+        paymentMethod: method,
+        checkInDate: reservation.date_in,
+        checkOutDate: reservation.date_out,
+      });
+    }
+    sendSuccessResponse(
+      res,
+      200,
+      "Reservation history found",
+      reservationHistory
+    );
+  } catch (error) {
+    next(error);
+  }
+};
+
 module.exports = {
   createReservation,
   getAllReservations,
   cancelBook,
   getReservationById,
+  confirmBook,
+  getReservationHistory,
 };

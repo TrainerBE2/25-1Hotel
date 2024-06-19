@@ -19,9 +19,16 @@ const keyGenerator = () => {
 const secretKey = () => {
   return process.env.JWT_SECRET;
 };
+const calculateNights = (startDate, endDate) => {
+  const start = new Date(startDate);
+  const end = new Date(endDate);
+  const nights = (end - start) / (1000 * 60 * 60 * 24);
+  return nights;
+};
 
 module.exports = {
   generateTransactionId,
   keyGenerator,
   secretKey,
+  calculateNights,
 };
