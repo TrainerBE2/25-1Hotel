@@ -23,7 +23,7 @@ const getAllRooms = async (req, res, next) => {
       total_users: totalCount,
       users,
     };
-    res.status(200).json(response);
+    res.status(200).json(response ? response : "Null");
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
