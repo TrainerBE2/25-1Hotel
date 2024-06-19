@@ -7,7 +7,7 @@ const {
   restoreUsers,
   updateUser,
   getUserById,
-  changePass
+  changePass,
 } = require("../controller/UserController");
 const authMidlleware = require("../middleware/authMiddleware");
 /* 
@@ -16,13 +16,11 @@ const authMidlleware = require("../middleware/authMiddleware");
 router.get("/", authMidlleware(["root"]), getAllUsers);
 router.put("/:id", authMidlleware(["root"]), deleteUsers);
 router.put("/:id", authMidlleware(["root"]), restoreUsers);
-router.get("/:id", authMidlleware(["root"]), getUserById);
+router.get("/:id", getUserById);
 /* 
 End Of Root
 */
-
 router.put("/changepass/:id", authMidlleware(["user"]), changePass);
-
 
 router.post("/register", createUser);
 router.put("edit/:id", updateUser);

@@ -116,7 +116,7 @@ const createReservation = async (req, res, next) => {
       {
         payment_id: payId,
         user_id,
-        method: "VA",
+        methode: "",
         amount: grossAmount,
         status: PENDING_PAYMENT,
       },

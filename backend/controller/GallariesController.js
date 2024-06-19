@@ -8,7 +8,7 @@ const {
   sendSuccessResponse,
 } = require("../utils/responseHandler");
 
-const createGallaries = (req, res) => {
+const uploadRoomImages = (req, res) => {
   upload.array("roomImages")(req, res, async function (err) {
     if (err instanceof multer.MulterError) {
       return sendErrorResponse(res, 500, "Multer error occurred", err.message);
@@ -69,31 +69,80 @@ const getGallaries = async (req, res, next) => {
   }
 };
 
-const updateGallaries = async (req, res, next) => {
+const updateImageById = async (req, res) => {
+  const { id } = req.query; // Menggunakan req.query karena ID mungkin dikirim sebagai parameter query
   try {
-    const gallaries_id = req.params.id; // Mendapatkan ID Room Categories dari parameter rute
-    const { room_id, gal_image } = req.body; // Mendapatkan data yang akan diperbarui dari body permintaan
+    // Cari gambar berdasarkan ID
+    let image = await tbl_gallaries.findByPk(id);
 
-    // Menemukan room categories berdasarkan ID
-    const room = await tbl_gallaries.findByPk(gallaries_id);
-
-    // Jika categories tidak ditemukan, kirim respons 404
-    if (!room) {
-      return res.status(404).json({ message: "Gallaries not found" });
+    if (!image) {
+      return sendErrorResponse(res, 404, `Image with ID ${id} not found`, null);
     }
 
-    // Memperbarui room categories
-    await room.update({
-      room_id: room_id,
-      gal_image: gal_image,
-    });
+    // Simpan nama gambar lama
+    const oldImageFileName = image.gal_image;
 
-    res.status(200).json({ message: "Room Categories updated successfully" });
-  } catch (error) {
-    res.status(500).json({ message: error.message });
+    // Proses unggah file baru menggunakan multer
+    upload.single("roomImages")(req, res, async function (err) {
+      if (err instanceof multer.MulterError) {
+        return sendErrorResponse(
+          res,
+          500,
+          "Multer error occurred",
+          err.message
+        );
+      } else if (err) {
+        return sendErrorResponse(
+          res,
+          500,
+          "Unknown error occurred",
+          err.message
+        );
+      }
+
+      // Jika berhasil diunggah, simpan nama file baru ke database
+      if (req.file) {
+        image.gal_image = req.file.filename; // Mengganti nama gambar dengan yang baru diunggah
+      } else {
+        return sendErrorResponse(res, 400, "New image file is required", null);
+      }
+
+      // Simpan hanya kolom gal_image yang diperbarui
+      await image.save({
+        fields: ["gal_image"], // Hanya menyimpan kolom gal_image
+      });
+
+      // Hapus file lama jika ada perubahan nama file
+      if (oldImageFileName !== image.gal_image) {
+        const oldImagePath = path.join(
+          __dirname,
+          "..",
+          "public",
+          "uploads",
+          "rooms",
+          oldImageFileName
+        );
+        fs.unlink(oldImagePath, (err) => {
+          if (err) {
+            console.error(
+              `Error removing file ${oldImageFileName}:`,
+              err.message
+            );
+          }
+        });
+      }
+
+      return sendSuccessResponse(
+        res,
+        200,
+        `Image with ID ${id} updated successfully`,
+        null
+      );
+    });
+  } catch (dbError) {
+    return sendErrorResponse(res, 500, "Database error", dbError.message);
   }
 };
-
 const deleteGallaries = async (req, res, next) => {
   try {
     const gallaries_id = req.params.id; // Getting the gallery ID from the route parameters
@@ -178,80 +227,6 @@ const deleteImageById = async (req, res) => {
 //     }
 //   });
 // };
-const updateImageById = async (req, res) => {
-  const { id } = req.query; // Menggunakan req.query karena ID mungkin dikirim sebagai parameter query
-  try {
-    // Cari gambar berdasarkan ID
-    let image = await tbl_gallaries.findByPk(id);
-
-    if (!image) {
-      return sendErrorResponse(res, 404, `Image with ID ${id} not found`, null);
-    }
-
-    // Simpan nama gambar lama
-    const oldImageFileName = image.gal_image;
-
-    // Proses unggah file baru menggunakan multer
-    upload.single("roomImages")(req, res, async function (err) {
-      if (err instanceof multer.MulterError) {
-        return sendErrorResponse(
-          res,
-          500,
-          "Multer error occurred",
-          err.message
-        );
-      } else if (err) {
-        return sendErrorResponse(
-          res,
-          500,
-          "Unknown error occurred",
-          err.message
-        );
-      }
-
-      // Jika berhasil diunggah, simpan nama file baru ke database
-      if (req.file) {
-        image.gal_image = req.file.filename; // Mengganti nama gambar dengan yang baru diunggah
-      } else {
-        return sendErrorResponse(res, 400, "New image file is required", null);
-      }
-
-      // Simpan hanya kolom gal_image yang diperbarui
-      await image.save({
-        fields: ["gal_image"], // Hanya menyimpan kolom gal_image
-      });
-
-      // Hapus file lama jika ada perubahan nama file
-      if (oldImageFileName !== image.gal_image) {
-        const oldImagePath = path.join(
-          __dirname,
-          "..",
-          "public",
-          "uploads",
-          "rooms",
-          oldImageFileName
-        );
-        fs.unlink(oldImagePath, (err) => {
-          if (err) {
-            console.error(
-              `Error removing file ${oldImageFileName}:`,
-              err.message
-            );
-          }
-        });
-      }
-
-      return sendSuccessResponse(
-        res,
-        200,
-        `Image with ID ${id} updated successfully`,
-        null
-      );
-    });
-  } catch (dbError) {
-    return sendErrorResponse(res, 500, "Database error", dbError.message);
-  }
-};
 const getAllImagesByRoomId = async (req, res) => {
   const { room_id } = req.params;
 

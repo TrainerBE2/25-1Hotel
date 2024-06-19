@@ -18,7 +18,7 @@ module.exports = (sequelize, DataTypes) => {
   tbl_users.init(
     {
       user_id: {
-        type: DataTypes.INTEGER,
+        type: DataTypes.STRING,
         allowNull: false,
         primaryKey: true,
       },
@@ -32,7 +32,7 @@ module.exports = (sequelize, DataTypes) => {
         values: ["root", "admin", "user"],
         defaultValue: "user",
       },
-      verification_token: DataTypes.STRING,
+      token: DataTypes.STRING,
       email_verified: {
         type: DataTypes.TINYINT,
         defaultValue: 0,

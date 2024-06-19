@@ -1,6 +1,6 @@
 const bcrypt = require("bcrypt");
-const nodemailer = require('nodemailer');
-const jwt = require('jsonwebtoken');
+const nodemailer = require("nodemailer");
+const jwt = require("jsonwebtoken");
 const { parse } = require("dotenv");
 const { tbl_users } = require("../databases/models");
 const Op = require("sequelize");
@@ -9,7 +9,8 @@ const {
   sendErrorResponse,
 } = require("../utils/responseHandler");
 
-const JWT_SECRET = 'f89f004efa04026db9f9ddec4fad92ef77598f41ca62404ceef160fe26f6f318';
+const JWT_SECRET =
+  "f89f004efa04026db9f9ddec4fad92ef77598f41ca62404ceef160fe26f6f318";
 
 const createUser = async (req, res, next) => {
   try {
@@ -18,7 +19,11 @@ const createUser = async (req, res, next) => {
     const hashedPassword = await bcrypt.hash(password, 10);
 
     // Generate a verification token
-    const verificationToken = jwt.sign({ email, f_name }, process.env.JWT_SECRET, { expiresIn: '1d' });
+    const verificationToken = jwt.sign(
+      { email, f_name },
+      process.env.JWT_SECRET,
+      { expiresIn: "1d" }
+    );
 
     const newUser = await tbl_users.create({
       user_id: id,
@@ -32,11 +37,17 @@ const createUser = async (req, res, next) => {
     });
 
     // Send verification email
-    const verificationUrl = `${req.protocol}://${req.get('host')}/api/v1/auth/verify-email?token=${verificationToken}`;
+    const verificationUrl = `${req.protocol}://${req.get(
+      "host"
+    )}/api/v1/auth/verify-email?token=${verificationToken}`;
 
     await sendVerificationEmail(email, verificationUrl);
 
-    sendSuccessResponse(res, 201, "User created successfully. Please verify your email.");
+    sendSuccessResponse(
+      res,
+      201,
+      "User created successfully. Please verify your email."
+    );
   } catch (error) {
     sendErrorResponse(res, 500, error.message);
   }
@@ -45,19 +56,19 @@ const createUser = async (req, res, next) => {
 // Function to send verification email
 const sendVerificationEmail = async (email, verificationUrl) => {
   const transporter = nodemailer.createTransport({
-    host: 'smtp.gmail.com', // Gmail SMTP server
+    host: "smtp.gmail.com", // Gmail SMTP server
     port: 465, // Secure SMTP
     secure: true, // true for 465, false for other ports
     auth: {
-      user: 'yovan211ix5@gmail.com', // Your email address
-      pass: 'dcqf dkyx giqh vjii', // Your password
+      user: "yovan211ix5@gmail.com", // Your email address
+      pass: "dcqf dkyx giqh vjii", // Your password
     },
   });
 
   const mailOptions = {
     from: process.env.EMAIL_USER,
     to: email,
-    subject: 'Verify your email address',
+    subject: "Verify your email address",
     html: `<p>Please click <a href="${verificationUrl}">here</a> to verify your email address.</p>`,
   };
 
@@ -119,6 +130,7 @@ const deleteUsers = async (req, res, next) => {
     }
   } catch (error) {
     sendErrorResponse(res, 500, error.message);
+    /*  */
   }
 };
 
@@ -167,7 +179,7 @@ const updateUser = async (req, res, next) => {
 const changePass = async (req, res, next) => {
   try {
     const userId = req.params.id;
-    const {  password  } = req.body;
+    const { password } = req.body;
     const user = await tbl_users.findByPk(userId);
 
     const hashedPassword = await bcrypt.hash(password, 10);
@@ -196,5 +208,5 @@ module.exports = {
   restoreUsers,
   updateUser,
   getUserById,
-  changePass
+  changePass,
 };

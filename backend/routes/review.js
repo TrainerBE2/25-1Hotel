@@ -7,7 +7,6 @@ const {
   archiveReview,
   restoreReview,
   editReview,
-  getReviewsByRoomOrUserId,
   getReviewsByRoomId,
   getReviewsByUserId,
 } = require("../controller/ReviewController");
