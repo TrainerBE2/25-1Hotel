@@ -13,7 +13,7 @@ const authMidlleware = require("../middleware/authMiddleware");
 /* 
   Root Level
 */
-router.get("/", getAllUsers);
+router.get("/", authMidlleware(["admin", "users"]), getAllUsers);
 router.put("/:id", authMidlleware(["root"]), deleteUsers);
 router.put("/:id", authMidlleware(["root"]), restoreUsers);
 router.get("/:id", getUserById);
