@@ -3,34 +3,47 @@ const { tbl_facilities } = require("../databases/models");
 const Op = require("sequelize");
 
 // get all facilities
-const getAllFacilities = async (req, res, next) => {
+const getAllFacilities = async (req, res) => {
   try {
-    const page = parseInt(req.query.page) || 1;
-    const limit = parseInt(req.query.limit) || 10;
-    const totalCount = await tbl_facilities.count();
+    let page = parseInt(req.query.page, 10);
+    let limit = parseInt(req.query.limit, 10);
+
+    if (isNaN(page) || page < 1) {
+      page = 1; // Default page value
+    }
+
+    if (isNaN(limit) || limit < 1) {
+      limit = 10; // Default limit value
+    }
+
     const offset = (page - 1) * limit;
-    const users = await tbl_facilities.findAll({
-      offset,
-      limit,
-    });
+
+    const { count: totalCount, rows: facilityList } =
+      await tbl_facilities.findAndCountAll({
+        offset,
+        limit,
+      });
+
     const response = {
       total_page: Math.ceil(totalCount / limit),
       current_page: page,
-      total_users: totalCount,
-      users,
+      total_facilities: totalCount,
+      facility_list: facilityList,
     };
+
     res.status(200).json(response);
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    console.error(error);
+    res
+      .status(500)
+      .json({ message: "Internal server error", error: error.message });
   }
 };
-
 // create facilities
 const createFacilities = async (req, res, next) => {
   try {
-    const { facilities_id, cat_id, facilities } = req.body;
+    const { cat_id, facilities } = req.body;
     const newFacilities = await tbl_facilities.create({
-      facilities_id: facilities_id,
       cat_id: cat_id,
       facilities: facilities,
     });

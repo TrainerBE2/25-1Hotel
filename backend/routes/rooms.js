@@ -10,7 +10,7 @@ const authMiddleware = require("../middleware/authMiddleware");
 
 router.get("/", getAllRooms);
 router.get("/:id", getRoomByID);
-router.post("/post", authMiddleware(["admin", "root"]), createRooms);
+router.post("/", authMiddleware(["admin", "root"]), createRooms);
 router.put("/edit/:id", authMiddleware(["admin", "root"]), updateRoom);
 
 module.exports = router;

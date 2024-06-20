@@ -6,14 +6,8 @@ const {
   updateRoomsCat,
 } = require("../controller/roomscatController");
 const authMiddleware = require("../middleware/authMiddleware");
-
-// router.get('/', function(req, res, next) {
-//   res.send('nice');
-// });
-
-// Define the route to fetch data
 router.get("/", getAllRoomsCat);
-router.post("/post", authMiddleware(["admin", "root"]), createRoomsCat);
+router.post("/", authMiddleware(["admin", "root"]), createRoomsCat);
 router.put("/edit/:id", authMiddleware(["admin", "root"]), updateRoomsCat);
 // router.get('/get/:id', getDataId);
 

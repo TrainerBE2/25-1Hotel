@@ -42,6 +42,14 @@ const createReservation = async (req, res, next) => {
       await transaction.rollback();
       return sendErrorResponse(res, 400, "User Not Found");
     }
+    const roomCategory = await tbl_rooms_categories.findOne({
+      where: { cat_id: roomDetail.cat_id },
+    });
+
+    if (!roomCategory) {
+      await transaction.rollback();
+      return sendErrorResponse(res, 400, "Room Category Not Found");
+    }
 
     const reservationId = generateTransactionId("INV/");
     const payId = generateTransactionId("PAY/");
@@ -58,7 +66,7 @@ const createReservation = async (req, res, next) => {
           id: room_id,
           price: roomDetail.price,
           quantity: calculateNights(d_in, d_out),
-          name: `Night of ${roomDetail.name}`,
+          name: `Night of ${roomCategory.name}`,
         },
       ],
       customer_details: {
@@ -261,15 +269,18 @@ const getReservationById = async (req, res, next) => {
 };
 
 const confirmBook = async (req, res, next) => {
+  const transaction = await sequelize.transaction();
   try {
     const { id } = req.query;
     const decodeId = decodeURIComponent(id);
 
     const reservation = await tbl_reservations.findOne({
       where: { reservation_id: decodeId },
+      transaction,
     });
 
     if (!reservation) {
+      await transaction.rollback();
       return sendErrorResponse(
         res,
         404,
@@ -277,38 +288,63 @@ const confirmBook = async (req, res, next) => {
       );
     }
 
+    const room = await tbl_rooms.findOne({
+      where: { room_id: reservation.room_id },
+      transaction,
+    });
+
     const [affectedRows] = await tbl_reservations.update(
       { status: "Confirmed" },
-      { where: { reservation_id: decodeId } }
+      { where: { reservation_id: decodeId }, transaction }
     );
-    if (affectedRows === 1) {
-      const transaction = await tbl_transactions.findOne({
-        where: { reservation_id: decodeId },
-      });
-      if (!transaction) {
-        return sendErrorResponse(
-          res,
-          404,
-          `Transaction with reservation ID ${decodeId} not found`
-        );
-      }
-      const [paymentAffectedRows] = await tbl_payments.update(
-        { status: "Paid" },
-        { where: { payment_id: transaction.payment_id } }
-      );
-      if (paymentAffectedRows === 1) {
-        sendSuccessResponse(res, 200, "Reservation has been confirmed", null);
-      } else {
-        sendErrorResponse(res, 500, "Failed to update payment status");
-      }
-    } else {
-      sendErrorResponse(
+
+    if (affectedRows !== 1) {
+      await transaction.rollback();
+      return sendErrorResponse(
         res,
         404,
         `Reservation with ID ${decodeId} not found or already confirmed`
       );
     }
+
+    const transactionRecord = await tbl_transactions.findOne({
+      where: { reservation_id: decodeId },
+      transaction,
+    });
+
+    if (!transactionRecord) {
+      await transaction.rollback();
+      return sendErrorResponse(
+        res,
+        404,
+        `Transaction with reservation ID ${decodeId} not found`
+      );
+    }
+
+    const [paymentAffectedRows] = await tbl_payments.update(
+      { status: "Paid" },
+      { where: { payment_id: transactionRecord.payment_id }, transaction }
+    );
+
+    if (paymentAffectedRows !== 1) {
+      await transaction.rollback();
+      return sendErrorResponse(res, 500, "Failed to update payment status");
+    }
+
+    const [roomAffectedRows] = await tbl_rooms.update(
+      { status: "Occupied" },
+      { where: { room_id: room.room_id }, transaction }
+    );
+
+    if (roomAffectedRows !== 1) {
+      await transaction.rollback();
+      return sendErrorResponse(res, 500, "Failed to update room status");
+    }
+
+    await transaction.commit();
+    sendSuccessResponse(res, 200, "Reservation has been confirmed", null);
   } catch (error) {
+    await transaction.rollback();
     next(error);
   }
 };
@@ -328,7 +364,7 @@ const getReservationHistory = async (req, res, next) => {
         res,
         200,
         "No reservations found for this user",
-        []
+        null
       );
     }
     let reservationHistory = [];
@@ -372,6 +408,7 @@ const getReservationHistory = async (req, res, next) => {
         paymentMethod: method,
         checkInDate: reservation.date_in,
         checkOutDate: reservation.date_out,
+        transaction_time: transaction.trans_date,
       });
     }
     sendSuccessResponse(

@@ -1,8 +1,6 @@
-'use strict';
-const {
-  Model
-} = require('sequelize');
-const { FOREIGNKEYS } = require('sequelize/lib/query-types');
+"use strict";
+const { Model } = require("sequelize");
+const { FOREIGNKEYS } = require("sequelize/lib/query-types");
 module.exports = (sequelize, DataTypes) => {
   class tbl_facilities extends Model {
     /**
@@ -12,30 +10,34 @@ module.exports = (sequelize, DataTypes) => {
      */
     static associate(models) {
       // define association here
-      this.belongsTo(models.tbl_rooms_categories, {foreignKey: 'cat_id'});
+      this.belongsTo(models.tbl_rooms_categories, { foreignKey: "cat_id" });
     }
   }
-  tbl_facilities.init({
-    facilities_id : {
-      type: DataTypes.STRING,
-      allowNull: false,
-      primaryKey: true
-    },
-    cat_id: {
-      type: DataTypes.STRING,
-      allowNull: false,
-      references: {
-        model: 'tbl_rooms_categories',
-        key: 'cat_id'
+  tbl_facilities.init(
+    {
+      facilities_id: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+        autoIncrement: true,
+        primaryKey: true,
       },
-      onUpdate: 'CASCADE',
-      onDelete: 'CASCADE'
+      cat_id: {
+        type: DataTypes.STRING,
+        allowNull: false,
+        references: {
+          model: "tbl_rooms_categories",
+          key: "cat_id",
+        },
+        onUpdate: "CASCADE",
+        onDelete: "CASCADE",
+      },
+      facilities: DataTypes.TEXT,
     },
-    description: DataTypes.TEXT,
-  }, {
-    sequelize,
-    modelName: 'tbl_facilities',
-    timestamps: true
-  });
+    {
+      sequelize,
+      modelName: "tbl_facilities",
+      timestamps: true,
+    }
+  );
   return tbl_facilities;
 };

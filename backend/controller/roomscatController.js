@@ -26,9 +26,8 @@ const getAllRoomsCat = async (req, res, next) => {
 
 const createRoomsCat = async (req, res, next) => {
   try {
-    const { cat_id, name, description } = req.body;
+    const { name, description } = req.body;
     const newRoomsCat = await tbl_rooms_categories.create({
-      cat_id: cat_id,
       name: name,
       description: description,
     });

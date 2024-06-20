@@ -1,7 +1,5 @@
-'use strict';
-const {
-  Model
-} = require('sequelize');
+"use strict";
+const { Model } = require("sequelize");
 module.exports = (sequelize, DataTypes) => {
   class tbl_rooms_categories extends Model {
     /**
@@ -11,25 +9,29 @@ module.exports = (sequelize, DataTypes) => {
      */
     static associate(models) {
       // define association here
-      this.hasMany(models.tbl_facilities, {foreignKey: 'cat_id'}),
-      this.hasMany(models.tbl_rooms, {foreignKey: 'cat_id'})
+      this.hasMany(models.tbl_facilities, { foreignKey: "cat_id" }),
+        this.hasMany(models.tbl_rooms, { foreignKey: "cat_id" });
     }
   }
-  tbl_rooms_categories.init({
-    cat_id: {
-      type: DataTypes.INTEGER,
-      allowNull: false,
-      primaryKey: true
+  tbl_rooms_categories.init(
+    {
+      cat_id: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+        primaryKey: true,
+        autoIncrement: true,
+      },
+      name: {
+        type: DataTypes.STRING,
+        allowNull: false,
+      },
+      description: DataTypes.TEXT,
     },
-    name: {
-      type: DataTypes.STRING,
-      allowNull: false
-    },
-    description: DataTypes.TEXT,
-  }, {
-    sequelize,
-    modelName: 'tbl_rooms_categories',
-    timestamps: true
-  });
+    {
+      sequelize,
+      modelName: "tbl_rooms_categories",
+      timestamps: true,
+    }
+  );
   return tbl_rooms_categories;
 };

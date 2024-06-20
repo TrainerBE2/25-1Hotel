@@ -11,8 +11,8 @@ const authMiddleware = require("../middleware/authMiddleware");
 // });
 
 // Define the route to fetch data
-router.get("/get", getAllFacilities);
-router.post("/post", authMiddleware(["admin", "root"]), createFacilities);
+router.get("/", getAllFacilities);
+router.post("/", authMiddleware(["admin", "root"]), createFacilities);
 router.put("/edit/:id", authMiddleware(["admin", "root"]), updateFacilities);
 
 module.exports = router;
